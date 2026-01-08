@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+<g clip-path="url(#a)"><mask id="b" width="40" height="40" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M40 0H0v40h40z"/></mask><g mask="url(#b)"><path fill="currentColor" d="M40 0H0v39.99h40z"/><path fill="#fff" d="M8.93 18.67v-1.275h23.74v-6.297L4.605 15.386v16.372H35.98V18.66H8.931zm8.15 10.214h-5.173v-4.55h5.172zm0-5.526h-5.173v-2.484h5.172zm10.436 5.526H18.01v-4.55h9.507zm0-5.526H18.01v-2.484h9.507zm6.103 5.526h-5.172v-4.55h5.172zm0-5.526h-5.172v-2.484h5.172zM34.27 8.651 9.2 12.484V8.698H7.116v4.111l-4.307.651.186 1.256 31.47-4.81z"/></g></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h40v40H0z"/></clipPath></defs>
+</svg>
