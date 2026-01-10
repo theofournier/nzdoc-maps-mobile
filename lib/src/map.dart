@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nzdoc_maps_mobile/src/locations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -79,23 +80,36 @@ class _MapWidgetState extends State<MapWidget> {
               child: GestureDetector(
                 onTap: () =>
                     _showMarkerDetails(context, 'Campsite', f.properties),
-                child: Icon(Icons.place, color: Colors.green),
+                child: SvgPicture.asset(
+                  'assets/doc_icons/camping.svg',
+                  width: 30,
+                  height: 30,
+                ),
               ),
             ),
           );
         }
 
-        for (final f in []) {
+        for (final f in walkings.features) {
           final coords = f.geometry.coordinates;
           if (coords is List && coords.length >= 2) {
             final lon = (coords[0] as num).toDouble();
             final lat = (coords[1] as num).toDouble();
+            final difficulty = f.properties['difficulty'] as String?;
+            final iconPath = _getDifficultyIcon(difficulty);
             markers.add(
               Marker(
                 width: 30,
                 height: 30,
                 point: LatLng(lat, lon),
-                child: Icon(Icons.directions_walk, color: Colors.blue),
+                child: GestureDetector(
+                  onTap: () => _showMarkerDetails(
+                    context,
+                    'Walking Experience',
+                    f.properties,
+                  ),
+                  child: SvgPicture.asset(iconPath, width: 30, height: 30),
+                ),
               ),
             );
           }
@@ -176,6 +190,25 @@ class _MapWidgetState extends State<MapWidget> {
         );
       },
     );
+  }
+
+  String _getDifficultyIcon(String? difficulty) {
+    if (difficulty == null) {
+      return 'assets/doc_icons/easy-walking-track.svg';
+    }
+
+    final difficultyLower = difficulty.toLowerCase();
+    if (difficultyLower.contains('Easiest')) {
+      return 'assets/doc_icons/easiest-short-walk.svg';
+    } else if (difficultyLower.contains('Expert')) {
+      return 'assets/doc_icons/expert-route.svg';
+    } else if (difficultyLower.contains('Advanced')) {
+      return 'assets/doc_icons/advanced-tramping-track.svg';
+    } else if (difficultyLower.contains('Intermediate')) {
+      return 'assets/doc_icons/Intermediate-great-walk-or-easier-tramping-track.svg';
+    } else {
+      return 'assets/doc_icons/easy-walking-track.svg';
+    }
   }
 
   void _showMarkerDetails(
