@@ -16,6 +16,7 @@ dependencies:
   json_annotation: ^4.9.0
   json_serializable: ^6.11.3
   flutter_map_location_marker: ^10.2.0
+  modal_bottom_sheet: ^3.0.0
 
 dev_dependencies:
   flutter_test:

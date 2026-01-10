@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nzdoc_maps_mobile/src/locations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 
@@ -75,7 +76,11 @@ class _MapWidgetState extends State<MapWidget> {
               width: 30,
               height: 30,
               point: LatLng(lat, lon),
-              child: Icon(Icons.place, color: Colors.green),
+              child: GestureDetector(
+                onTap: () =>
+                    _showMarkerDetails(context, 'Campsite', f.properties),
+                child: Icon(Icons.place, color: Colors.green),
+              ),
             ),
           );
         }
@@ -109,8 +114,7 @@ class _MapWidgetState extends State<MapWidget> {
                   points.add(LatLng(lat, lon));
                 }
               }
-            }
-            else if (coords[0] is List && coords[0][0] is List) {
+            } else if (coords[0] is List && coords[0][0] is List) {
               for (final lineString in coords) {
                 if (lineString is List) {
                   for (final coord in lineString) {
@@ -169,6 +173,98 @@ class _MapWidgetState extends State<MapWidget> {
             //PolylineLayer(polylines: polylines),
             MarkerLayer(markers: markers),
           ],
+        );
+      },
+    );
+  }
+
+  void _showMarkerDetails(
+    BuildContext context,
+    String markerType,
+    Map<String, dynamic> properties,
+  ) {
+    showBarModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      markerType,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                if (properties['name'] != null) ...[
+                  Text('Name', style: Theme.of(context).textTheme.labelLarge),
+                  Text(properties['name'] as String),
+                  const SizedBox(height: 12),
+                ],
+                if (properties['introduction'] != null) ...[
+                  Text(
+                    'Description',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(properties['introduction'] as String),
+                  const SizedBox(height: 12),
+                ],
+                if (properties['place'] != null) ...[
+                  Text('Place', style: Theme.of(context).textTheme.labelLarge),
+                  Text(properties['place'] as String),
+                  const SizedBox(height: 12),
+                ],
+                if (properties['region'] != null) ...[
+                  Text('Region', style: Theme.of(context).textTheme.labelLarge),
+                  Text(properties['region'] as String),
+                  const SizedBox(height: 12),
+                ],
+                if (properties['difficulty'] != null) ...[
+                  Text(
+                    'Difficulty',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(properties['difficulty'] as String),
+                  const SizedBox(height: 12),
+                ],
+                if (properties['completionTime'] != null) ...[
+                  Text(
+                    'Completion Time',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(properties['completionTime'] as String),
+                  const SizedBox(height: 12),
+                ],
+                if (properties['facilities'] != null) ...[
+                  Text(
+                    'Facilities',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(properties['facilities'] as String),
+                  const SizedBox(height: 12),
+                ],
+                if (properties['activities'] != null) ...[
+                  Text(
+                    'Activities',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(properties['activities'] as String),
+                  const SizedBox(height: 12),
+                ],
+              ],
+            ),
+          ),
         );
       },
     );
