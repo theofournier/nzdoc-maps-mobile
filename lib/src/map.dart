@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:nzdoc_maps_mobile/src/locations.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -13,16 +16,33 @@ class MapWidget extends StatefulWidget {
 class _MapWidgetState extends State<MapWidget> {
   late final Future<Map<String, dynamic>> _dataFuture;
 
+  late AlignOnUpdate _alignPositionOnUpdate;
+  late final StreamController<double?> _alignPositionStreamController;
+
   @override
   void initState() {
     super.initState();
     _dataFuture = _loadData();
+
+    _alignPositionOnUpdate = AlignOnUpdate.always;
+    _alignPositionStreamController = StreamController<double?>();
+  }
+
+  @override
+  void dispose() {
+    _alignPositionStreamController.close();
+    super.dispose();
   }
 
   Future<Map<String, dynamic>> _loadData() async {
     final campsites = await loadCampsitesFromAssets();
     final walkings = await loadWalkingExperiencesFromAssets();
-    return {'campsites': campsites, 'walkings': walkings};
+    final walkingRoutes = await loadWalkingRoutesFromAssets();
+    return {
+      'campsites': campsites,
+      'walkings': walkings,
+      'walkingRoutes': walkingRoutes,
+    };
   }
 
   @override
@@ -41,8 +61,11 @@ class _MapWidgetState extends State<MapWidget> {
             snapshot.data!['campsites'] as CampsiteFeatureCollection;
         final walkings =
             snapshot.data!['walkings'] as WalkingExperienceFeatureCollection;
+        final walkingRoutes =
+            snapshot.data!['walkingRoutes'] as WalkingRouteFeatureCollection;
 
         final List<Marker> markers = [];
+        final List<Polyline> polylines = [];
 
         for (final f in campsites.features) {
           final lat = f.geometry.latitude;
@@ -57,7 +80,7 @@ class _MapWidgetState extends State<MapWidget> {
           );
         }
 
-        for (final f in walkings.features) {
+        for (final f in []) {
           final coords = f.geometry.coordinates;
           if (coords is List && coords.length >= 2) {
             final lon = (coords[0] as num).toDouble();
@@ -73,13 +96,77 @@ class _MapWidgetState extends State<MapWidget> {
           }
         }
 
+        for (final f in walkingRoutes.features) {
+          final coords = f.geometry.coordinates;
+          final points = <LatLng>[];
+
+          if (coords is List && coords.isNotEmpty) {
+            if (coords[0] is List && coords[0][0] is! List) {
+              for (final coord in coords) {
+                if (coord is List && coord.length >= 2) {
+                  final lon = (coord[0] as num).toDouble();
+                  final lat = (coord[1] as num).toDouble();
+                  points.add(LatLng(lat, lon));
+                }
+              }
+            }
+            else if (coords[0] is List && coords[0][0] is List) {
+              for (final lineString in coords) {
+                if (lineString is List) {
+                  for (final coord in lineString) {
+                    if (coord is List && coord.length >= 2) {
+                      final lon = (coord[0] as num).toDouble();
+                      final lat = (coord[1] as num).toDouble();
+                      points.add(LatLng(lat, lon));
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          if (points.isNotEmpty) {
+            polylines.add(
+              Polyline(points: points, color: Colors.purple, strokeWidth: 3),
+            );
+          }
+        }
+
         return FlutterMap(
-          options: MapOptions(initialCenter: LatLng(-41, 174), initialZoom: 5),
+          options: MapOptions(
+            initialCenter: LatLng(-41, 174),
+            initialZoom: 5,
+            onPositionChanged: (MapCamera camera, bool hasGesture) {
+              if (hasGesture && _alignPositionOnUpdate != AlignOnUpdate.never) {
+                setState(() => _alignPositionOnUpdate = AlignOnUpdate.never);
+              }
+            },
+          ),
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.tfournier.nzdocmapsmobile',
             ),
+            CurrentLocationLayer(
+              alignPositionStream: _alignPositionStreamController.stream,
+              alignPositionOnUpdate: _alignPositionOnUpdate,
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    setState(
+                      () => _alignPositionOnUpdate = AlignOnUpdate.always,
+                    );
+                    _alignPositionStreamController.add(15);
+                  },
+                  child: const Icon(Icons.my_location, color: Colors.white),
+                ),
+              ),
+            ),
+            //PolylineLayer(polylines: polylines),
             MarkerLayer(markers: markers),
           ],
         );
