@@ -8,6 +8,8 @@ import 'package:nzdoc_maps_mobile/src/locations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+enum FilterType { campsites, walkings, routes }
+
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
 
@@ -20,6 +22,7 @@ class _MapWidgetState extends State<MapWidget> {
 
   late AlignOnUpdate _alignPositionOnUpdate;
   late final StreamController<double?> _alignPositionStreamController;
+  final Set<FilterType> _activeFilters = {FilterType.campsites};
 
   @override
   void initState() {
@@ -69,84 +72,90 @@ class _MapWidgetState extends State<MapWidget> {
         final List<Marker> markers = [];
         final List<Polyline> polylines = [];
 
-        for (final f in campsites.features) {
-          final lat = f.geometry.latitude;
-          final lon = f.geometry.longitude;
-          markers.add(
-            Marker(
-              width: 30,
-              height: 30,
-              point: LatLng(lat, lon),
-              child: GestureDetector(
-                onTap: () =>
-                    _showMarkerDetails(context, 'Campsite', f.properties),
-                child: SvgPicture.asset(
-                  'assets/doc_icons/camping.svg',
-                  width: 30,
-                  height: 30,
-                ),
-              ),
-            ),
-          );
-        }
-
-        for (final f in walkings.features) {
-          final coords = f.geometry.coordinates;
-          if (coords is List && coords.length >= 2) {
-            final lon = (coords[0] as num).toDouble();
-            final lat = (coords[1] as num).toDouble();
-            final difficulty = f.properties['difficulty'] as String?;
-            final iconPath = _getDifficultyIcon(difficulty);
+        if (_activeFilters.contains(FilterType.campsites)) {
+          for (final f in campsites.features) {
+            final lat = f.geometry.latitude;
+            final lon = f.geometry.longitude;
             markers.add(
               Marker(
                 width: 30,
                 height: 30,
                 point: LatLng(lat, lon),
                 child: GestureDetector(
-                  onTap: () => _showMarkerDetails(
-                    context,
-                    'Walking Experience',
-                    f.properties,
+                  onTap: () =>
+                      _showMarkerDetails(context, 'Campsite', f.properties),
+                  child: SvgPicture.asset(
+                    'assets/doc_icons/camping.svg',
+                    width: 30,
+                    height: 30,
                   ),
-                  child: SvgPicture.asset(iconPath, width: 30, height: 30),
                 ),
               ),
             );
           }
         }
 
-        for (final f in walkingRoutes.features) {
-          final coords = f.geometry.coordinates;
-          final points = <LatLng>[];
+        if (_activeFilters.contains(FilterType.walkings)) {
+          for (final f in walkings.features) {
+            final coords = f.geometry.coordinates;
+            if (coords is List && coords.length >= 2) {
+              final lon = (coords[0] as num).toDouble();
+              final lat = (coords[1] as num).toDouble();
+              final difficulty = f.properties['difficulty'] as String?;
+              final iconPath = _getDifficultyIcon(difficulty);
+              markers.add(
+                Marker(
+                  width: 30,
+                  height: 30,
+                  point: LatLng(lat, lon),
+                  child: GestureDetector(
+                    onTap: () => _showMarkerDetails(
+                      context,
+                      'Walking Experience',
+                      f.properties,
+                    ),
+                    child: SvgPicture.asset(iconPath, width: 30, height: 30),
+                  ),
+                ),
+              );
+            }
+          }
+        }
 
-          if (coords is List && coords.isNotEmpty) {
-            if (coords[0] is List && coords[0][0] is! List) {
-              for (final coord in coords) {
-                if (coord is List && coord.length >= 2) {
-                  final lon = (coord[0] as num).toDouble();
-                  final lat = (coord[1] as num).toDouble();
-                  points.add(LatLng(lat, lon));
+        if (_activeFilters.contains(FilterType.routes)) {
+          for (final f in walkingRoutes.features) {
+            final coords = f.geometry.coordinates;
+            final points = <LatLng>[];
+
+            if (coords is List && coords.isNotEmpty) {
+              if (coords[0] is List && coords[0][0] is! List) {
+                for (final coord in coords) {
+                  if (coord is List && coord.length >= 2) {
+                    final lon = (coord[0] as num).toDouble();
+                    final lat = (coord[1] as num).toDouble();
+                    points.add(LatLng(lat, lon));
+                  }
                 }
-              }
-            } else if (coords[0] is List && coords[0][0] is List) {
-              for (final lineString in coords) {
-                if (lineString is List) {
-                  for (final coord in lineString) {
-                    if (coord is List && coord.length >= 2) {
-                      final lon = (coord[0] as num).toDouble();
-                      final lat = (coord[1] as num).toDouble();
-                      points.add(LatLng(lat, lon));
+              } else if (coords[0] is List && coords[0][0] is List) {
+                for (final lineString in coords) {
+                  if (lineString is List) {
+                    for (final coord in lineString) {
+                      if (coord is List && coord.length >= 2) {
+                        final lon = (coord[0] as num).toDouble();
+                        final lat = (coord[1] as num).toDouble();
+                        points.add(LatLng(lat, lon));
+                      }
                     }
                   }
                 }
               }
             }
-          }
 
-          if (points.isNotEmpty) {
-            polylines.add(
-              Polyline(points: points, color: Colors.purple, strokeWidth: 3),
-            );
+            if (points.isNotEmpty) {
+              polylines.add(
+                Polyline(points: points, color: Colors.purple, strokeWidth: 3),
+              );
+            }
           }
         }
 
@@ -170,6 +179,71 @@ class _MapWidgetState extends State<MapWidget> {
               alignPositionOnUpdate: _alignPositionOnUpdate,
             ),
             Align(
+              alignment: Alignment.topCenter,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Material(
+                    color: Colors.white70,
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'DOC Maps',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(width: 12),
+                          PopupMenuButton<FilterType>(
+                            icon: const Icon(Icons.filter_list),
+                            onSelected: (f) => setState(() {
+                              if (_activeFilters.contains(f)) {
+                                _activeFilters.remove(f);
+                              } else {
+                                _activeFilters.add(f);
+                              }
+                            }),
+                            itemBuilder: (context) => [
+                              CheckedPopupMenuItem(
+                                value: FilterType.campsites,
+                                checked: _activeFilters.contains(
+                                  FilterType.campsites,
+                                ),
+                                child: const Text('Campsites'),
+                              ),
+                              CheckedPopupMenuItem(
+                                value: FilterType.walkings,
+                                checked: _activeFilters.contains(
+                                  FilterType.walkings,
+                                ),
+                                child: const Text('Walking Experiences'),
+                              ),
+                              CheckedPopupMenuItem(
+                                value: FilterType.routes,
+                                checked: _activeFilters.contains(
+                                  FilterType.routes,
+                                ),
+                                child: const Text('Routes'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Align(
               alignment: Alignment.bottomRight,
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -184,7 +258,7 @@ class _MapWidgetState extends State<MapWidget> {
                 ),
               ),
             ),
-            //PolylineLayer(polylines: polylines),
+            PolylineLayer(polylines: polylines),
             MarkerLayer(markers: markers),
           ],
         );
@@ -198,13 +272,13 @@ class _MapWidgetState extends State<MapWidget> {
     }
 
     final difficultyLower = difficulty.toLowerCase();
-    if (difficultyLower.contains('Easiest')) {
+    if (difficultyLower.contains('easiest')) {
       return 'assets/doc_icons/easiest-short-walk.svg';
-    } else if (difficultyLower.contains('Expert')) {
+    } else if (difficultyLower.contains('expert')) {
       return 'assets/doc_icons/expert-route.svg';
-    } else if (difficultyLower.contains('Advanced')) {
+    } else if (difficultyLower.contains('advanced')) {
       return 'assets/doc_icons/advanced-tramping-track.svg';
-    } else if (difficultyLower.contains('Intermediate')) {
+    } else if (difficultyLower.contains('intermediate')) {
       return 'assets/doc_icons/Intermediate-great-walk-or-easier-tramping-track.svg';
     } else {
       return 'assets/doc_icons/easy-walking-track.svg';
