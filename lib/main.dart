@@ -1,28 +1,32 @@
+import 'package:nzdoc_maps_mobile/data/repositories/location_repository.dart';
+import 'package:nzdoc_maps_mobile/data/services/doc_api_client.dart';
+import 'package:nzdoc_maps_mobile/routing/router.dart';
+import 'package:provider/provider.dart';
+
 import 'package:flutter/material.dart';
-import 'package:nzdoc_maps_mobile/src/map.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider(create: (_) => DocApiClient()),
+        Provider(
+          create: (context) => LocationRepository(docApiClient: context.read()),
+        ),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const MyHomePage(),
+    return MaterialApp.router(
+      title: 'NZDoc Maps Mobile',
+      routerConfig: router(),
     );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: MapWidget());
   }
 }
