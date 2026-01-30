@@ -23,6 +23,21 @@ class MapViewModel extends ChangeNotifier {
   final Map<MarkerId, MarkerData> _markers = {};
   Map<MarkerId, MarkerData> get markers => _markers;
 
+  MarkerId? _selectedMarkerId;
+  MarkerId? get selectedMarkerId => _selectedMarkerId;
+  dynamic get selectedData =>
+      _selectedMarkerId != null ? _markers[_selectedMarkerId]?.data : null;
+
+  void selectMarker(MarkerId id) {
+    _selectedMarkerId = id;
+    notifyListeners();
+  }
+
+  void clearSelection() {
+    _selectedMarkerId = null;
+    notifyListeners();
+  }
+
   late BitmapDescriptor _campingIcon;
   late BitmapDescriptor _walkingIcon;
 
@@ -63,6 +78,7 @@ class MapViewModel extends ChangeNotifier {
             position: LatLng(campsite.point.y, campsite.point.x),
             infoWindow: InfoWindow(title: campsite.name),
             icon: _campingIcon,
+            onTap: () => selectMarker(markerId),
           );
           _markers[markerId] = MarkerData(marker: marker, data: campsite);
         }
@@ -75,6 +91,7 @@ class MapViewModel extends ChangeNotifier {
             position: LatLng(walking.point.y, walking.point.x),
             infoWindow: InfoWindow(title: walking.name),
             icon: _walkingIcon,
+            onTap: () => selectMarker(markerId),
           );
           _markers[markerId] = MarkerData(marker: marker, data: walking);
         }
