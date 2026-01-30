@@ -17,7 +17,7 @@ class MapScreen extends StatelessWidget {
             target: LatLng(-41.2865, 174.7762), // Wellington, NZ
             zoom: 6,
           ),
-          markers: viewModel.markers.values.toSet(),
+          markers: viewModel.markers.values.map((e) => e.marker).toSet(),
         ),
       ),
     );

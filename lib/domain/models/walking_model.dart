@@ -13,21 +13,44 @@ enum Difficulty {
   const Difficulty(this.displayName);
 }
 
-Difficulty? _parseDifficulty(String value) {
-  switch (value) {
-    case 'Easiest':
-      return Difficulty.easiest;
-    case 'Easy':
-      return Difficulty.easy;
-    case 'Intermediate':
-      return Difficulty.intermediate;
-    case 'Advanced':
-      return Difficulty.advanced;
-    case 'Expert':
-      return Difficulty.expert;
-    default:
-      return null;
+List<Difficulty> _parseDifficulties(String difficultiesString) {
+  final difficulties = <Difficulty>[];
+  var remaining = difficultiesString.trim();
+
+  while (remaining.isNotEmpty) {
+    bool found = false;
+
+    // Match longest names first
+    final sorted = Difficulty.values.map((e) => e.displayName).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+
+    for (final name in sorted) {
+      if (remaining.startsWith(name)) {
+        difficulties.add(
+          Difficulty.values.firstWhere((e) => e.displayName == name),
+        );
+        remaining = remaining.substring(name.length).trim();
+
+        if (remaining.startsWith(',')) {
+          remaining = remaining.substring(1).trim();
+        }
+
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      final commaIndex = remaining.indexOf(',');
+      if (commaIndex != -1) {
+        remaining = remaining.substring(commaIndex + 1).trim();
+      } else {
+        break;
+      }
+    }
   }
+
+  return difficulties;
 }
 
 class Walking {
@@ -65,12 +88,9 @@ class Walking {
       id: walkingFeature.properties.objectId,
       name: walkingFeature.properties.name,
       introduction: walkingFeature.properties.introduction,
-      difficulty: walkingFeature.properties.difficulty
-          ?.split(', ')
-          .map((f) => _parseDifficulty(f.trim()))
-          .where((f) => f != null)
-          .cast<Difficulty>()
-          .toList(),
+      difficulty: walkingFeature.properties.difficulty != null
+          ? _parseDifficulties(walkingFeature.properties.difficulty!)
+          : null,
       completionTime: walkingFeature.properties.completionTime,
       hasAlerts: walkingFeature.properties.hasAlerts,
       introductionThumbnail: walkingFeature.properties.introductionThumbnail,

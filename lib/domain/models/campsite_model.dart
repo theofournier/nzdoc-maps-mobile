@@ -86,128 +86,172 @@ enum Access {
   const Access(this.displayName);
 }
 
-Facility? _parseFacility(String facility) {
-  switch (facility) {
-    case 'Toilets':
-      return Facility.toilets;
-    case 'Toilets - flush':
-      return Facility.toiletsFlush;
-    case 'Toilets - non-flush':
-      return Facility.toiletsNonFlush;
-    case 'Non-powered/tent sites':
-      return Facility.nonPoweredTentSites;
-    case 'Powered sites':
-      return Facility.poweredSites;
-    case 'Shelter for cooking':
-      return Facility.shelterForCooking;
-    case 'Water from tap - not treated, boil before use':
-      return Facility.waterFromTap;
-    case 'Water from tap - treated, suitable for drinking':
-      return Facility.waterFromTapTreated;
-    case 'Water from stream':
-      return Facility.waterFromStream;
-    case 'Water supply':
-      return Facility.waterSupply;
-    case 'Shower - cold':
-      return Facility.showerCold;
-    case 'Shower - hot':
-      return Facility.showerHot;
-    case 'Boat launching':
-      return Facility.boatLaunching;
-    case 'Jetty':
-      return Facility.jetty;
-    case 'BBQ':
-      return Facility.bbq;
-    case 'Fire pit/place for campfires (except in fire bans)':
-      return Facility.firePit;
-    case 'Cookers/electric stove':
-      return Facility.cookersElectricStove;
-    case 'Phone':
-      return Facility.phone;
-    case 'Wheelchair accessible':
-      return Facility.wheelchairAccessible;
-    case 'Wheelchair accessible with assistance':
-      return Facility.wheelchairAccessibleWithAssistance;
-    default:
-      print("Unknown facility: $facility");
-      return null;
+List<Facility> _parseFacilities(String facilitiesString) {
+  final facilities = <Facility>[];
+  var remaining = facilitiesString.trim();
+
+  while (remaining.isNotEmpty) {
+    bool found = false;
+
+    // Try to match from longest to shortest to handle facilities with commas first
+    final sortedFacilities = Facility.values.map((e) => e.displayName).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+
+    for (final facilityName in sortedFacilities) {
+      if (remaining.startsWith(facilityName)) {
+        facilities.add(
+          Facility.values.firstWhere((e) => e.displayName == facilityName),
+        );
+        remaining = remaining.substring(facilityName.length).trim();
+
+        // Remove leading comma and whitespace if present
+        if (remaining.startsWith(',')) {
+          remaining = remaining.substring(1).trim();
+        }
+
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      // Skip unrecognized facilities - find next comma
+      final commaIndex = remaining.indexOf(',');
+      if (commaIndex != -1) {
+        remaining = remaining.substring(commaIndex + 1).trim();
+      } else {
+        break;
+      }
+    }
   }
+
+  return facilities;
 }
 
-Activity? _parseActivity(String activity) {
-  switch (activity) {
-    case 'Bird and wildlife watching':
-      return Activity.birdAndWildlifeWatching;
-    case 'Boating':
-      return Activity.boating;
-    case 'Camping':
-      return Activity.camping;
-    case 'Caving':
-      return Activity.caving;
-    case 'Diving and snorkelling':
-      return Activity.divingAndSnorkelling;
-    case 'Fishing':
-      return Activity.fishing;
-    case 'Four wheel driving':
-      return Activity.fourWheelDriving;
-    case 'Hunting':
-      return Activity.hunting;
-    case 'Kayaking and canoeing':
-      return Activity.kayakingAndCanoeing;
-    case 'Mountain biking':
-      return Activity.mountainBiking;
-    case 'Picnicking':
-      return Activity.picnicking;
-    case 'Rafting':
-      return Activity.rafting;
-    case 'Skiing and ski touring':
-      return Activity.skiingAndSkiTouring;
-    case 'Swimming':
-      return Activity.swimming;
-    case 'Walking and tramping':
-      return Activity.walkingAndTramping;
-    default:
-      print("Unknown activity: $activity");
-      return null;
+List<Activity> _parseActivities(String activitiesString) {
+  final activities = <Activity>[];
+  var remaining = activitiesString.trim();
+
+  while (remaining.isNotEmpty) {
+    bool found = false;
+
+    // Try to match from longest to shortest
+    final sortedActivities = Activity.values.map((e) => e.displayName).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+
+    for (final activityName in sortedActivities) {
+      if (remaining.startsWith(activityName)) {
+        activities.add(
+          Activity.values.firstWhere((e) => e.displayName == activityName),
+        );
+        remaining = remaining.substring(activityName.length).trim();
+
+        // Remove leading comma and whitespace if present
+        if (remaining.startsWith(',')) {
+          remaining = remaining.substring(1).trim();
+        }
+
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      // Skip unrecognized activities - find next comma
+      final commaIndex = remaining.indexOf(',');
+      if (commaIndex != -1) {
+        remaining = remaining.substring(commaIndex + 1).trim();
+      } else {
+        break;
+      }
+    }
   }
+
+  return activities;
 }
 
-Landscape? _parseLandscape(String landscape) {
-  switch (landscape) {
-    case 'Alpine':
-      return Landscape.alpine;
-    case 'Coastal':
-      return Landscape.coastal;
-    case 'Forest':
-      return Landscape.forest;
-    case 'Rivers and lakes':
-      return Landscape.riversAndLakes;
-    default:
-      print("Unknown landscape: $landscape");
-      return null;
+List<Landscape> _parseLandscapes(String landscapesString) {
+  final landscapes = <Landscape>[];
+  var remaining = landscapesString.trim();
+
+  while (remaining.isNotEmpty) {
+    bool found = false;
+
+    // Try to match from longest to shortest
+    final sortedLandscapes = Landscape.values.map((e) => e.displayName).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+
+    for (final landscapeName in sortedLandscapes) {
+      if (remaining.startsWith(landscapeName)) {
+        landscapes.add(
+          Landscape.values.firstWhere((e) => e.displayName == landscapeName),
+        );
+        remaining = remaining.substring(landscapeName.length).trim();
+
+        // Remove leading comma and whitespace if present
+        if (remaining.startsWith(',')) {
+          remaining = remaining.substring(1).trim();
+        }
+
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      // Skip unrecognized landscapes - find next comma
+      final commaIndex = remaining.indexOf(',');
+      if (commaIndex != -1) {
+        remaining = remaining.substring(commaIndex + 1).trim();
+      } else {
+        break;
+      }
+    }
   }
+
+  return landscapes;
 }
 
-Access? _parseAccess(String access) {
-  switch (access) {
-    case '4WD':
-      return Access.fourWd;
-    case 'Boat':
-      return Access.boat;
-    case 'Campervan':
-      return Access.campervan;
-    case 'Car':
-      return Access.car;
-    case 'Caravan':
-      return Access.caravan;
-    case 'Foot':
-      return Access.foot;
-    case 'Mountain bike':
-      return Access.mountainBike;
-    default:
-      print("Unknown access: $access");
-      return null;
+List<Access> _parseAccessList(String accessString) {
+  final accessList = <Access>[];
+  var remaining = accessString.trim();
+
+  while (remaining.isNotEmpty) {
+    bool found = false;
+
+    // Try to match from longest to shortest
+    final sortedAccess = Access.values.map((e) => e.displayName).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+
+    for (final accessName in sortedAccess) {
+      if (remaining.startsWith(accessName)) {
+        accessList.add(
+          Access.values.firstWhere((e) => e.displayName == accessName),
+        );
+        remaining = remaining.substring(accessName.length).trim();
+
+        // Remove leading comma and whitespace if present
+        if (remaining.startsWith(',')) {
+          remaining = remaining.substring(1).trim();
+        }
+
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      // Skip unrecognized access types - find next comma
+      final commaIndex = remaining.indexOf(',');
+      if (commaIndex != -1) {
+        remaining = remaining.substring(commaIndex + 1).trim();
+      } else {
+        break;
+      }
+    }
   }
+
+  return accessList;
 }
 
 class Campsite {
@@ -289,31 +333,17 @@ class Campsite {
       numberOfUnpoweredSites: props.numberOfUnpoweredSites,
       bookable: props.bookable?.toLowerCase() == 'yes',
       free: props.free,
-      facilities: props.facilities
-          ?.split(', ')
-          .map((f) => _parseFacility(f.trim()))
-          .where((f) => f != null)
-          .cast<Facility>()
-          .toList(),
-      activities: props.activities
-          ?.split(', ')
-          .map((a) => _parseActivity(a.trim()))
-          .where((a) => a != null)
-          .cast<Activity>()
-          .toList(),
+      facilities: props.facilities != null
+          ? _parseFacilities(props.facilities!)
+          : null,
+      activities: props.activities != null
+          ? _parseActivities(props.activities!)
+          : null,
       dogsAllowed: props.dogsAllowed,
-      landscapes: props.landscape
-          ?.split(', ')
-          .map((a) => _parseLandscape(a.trim()))
-          .where((a) => a != null)
-          .cast<Landscape>()
-          .toList(),
-      access: props.access
-          ?.split(', ')
-          .map((a) => _parseAccess(a.trim()))
-          .where((a) => a != null)
-          .cast<Access>()
-          .toList(),
+      landscapes: props.landscape != null
+          ? _parseLandscapes(props.landscape!)
+          : null,
+      access: props.access != null ? _parseAccessList(props.access!) : null,
       hasAlerts: props.hasAlerts,
       introductionThumbnail: props.introductionThumbnail,
       staticLink: props.staticLink,
