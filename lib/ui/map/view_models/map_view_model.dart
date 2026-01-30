@@ -28,8 +28,20 @@ class MapViewModel extends ChangeNotifier {
 
   final Set<FilterType> _activeFilters = {
     FilterType.campsites,
-    FilterType.walkings,
   };
+
+  bool isFilterActive(FilterType type) => _activeFilters.contains(type);
+
+  /// Enable or disable a filter and reload markers.
+  void setFilterActive(FilterType type, bool enabled) {
+    if (enabled) {
+      _activeFilters.add(type);
+    } else {
+      _activeFilters.remove(type);
+    }
+    // Reload markers according to updated filters.
+    _load();
+  }
 
   Future<void> _load() async {
     try {
