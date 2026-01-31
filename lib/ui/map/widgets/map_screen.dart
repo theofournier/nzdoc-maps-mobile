@@ -154,6 +154,7 @@ class _MapScreenState extends State<MapScreen> {
                   zoom: 6,
                 ),
                 markers: markers,
+                polylines: viewModel.polylines,
               );
             },
           ),

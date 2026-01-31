@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nzdoc_maps_mobile/data/repositories/location_repository.dart';
-import 'dart:ui' as ui;
+import 'package:nzdoc_maps_mobile/domain/models/walking_model.dart';
+import 'package:nzdoc_maps_mobile/domain/models/geometry_model.dart';
+import 'dart:ui' as ui; 
 
 enum FilterType { campsites, walkings }
 
@@ -30,11 +32,13 @@ class MapViewModel extends ChangeNotifier {
 
   void selectMarker(MarkerId id) {
     _selectedMarkerId = id;
+    _updatePolylinesForSelection();
     notifyListeners();
   }
 
   void clearSelection() {
     _selectedMarkerId = null;
+    _polylines.clear();
     notifyListeners();
   }
 
@@ -44,6 +48,47 @@ class MapViewModel extends ChangeNotifier {
   final Set<FilterType> _activeFilters = {
     FilterType.campsites,
   };
+
+  final Set<Polyline> _polylines = {};
+  Set<Polyline> get polylines => _polylines;
+
+  void _updatePolylinesForSelection() {
+    _polylines.clear();
+    if (_selectedMarkerId == null) return;
+    final md = _markers[_selectedMarkerId];
+    if (md == null) return;
+    final data = md.data;
+    if (data is! Walking) return;
+    final route = data.route;
+    if (route == null) return;
+    final line = route.line;
+    if (line is LineString) {
+      final points = line.coordinates
+          .map((p) => LatLng(p.y, p.x))
+          .toList();
+      _polylines.add(
+        Polyline(
+          polylineId: PolylineId('walking_${data.id}_0'),
+          points: points,
+          color: ui.Color(0xFF1E88E5),
+          width: 4,
+        ),
+      );
+    } else if (line is MultiLineString) {
+      for (var i = 0; i < line.coordinates.length; i++) {
+        final points =
+            line.coordinates[i].map((p) => LatLng(p.y, p.x)).toList();
+        _polylines.add(
+          Polyline(
+            polylineId: PolylineId('walking_${data.id}_$i'),
+            points: points,
+            color: ui.Color(0xFF1E88E5),
+            width: 4,
+          ),
+        );
+      }
+    }
+  }
 
   bool isFilterActive(FilterType type) => _activeFilters.contains(type);
 
@@ -99,6 +144,7 @@ class MapViewModel extends ChangeNotifier {
 
       print('markers loaded: ${_markers.length}');
     } finally {
+      _updatePolylinesForSelection();
       notifyListeners();
     }
   }
