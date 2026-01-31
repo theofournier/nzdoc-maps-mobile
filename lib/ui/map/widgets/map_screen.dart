@@ -25,7 +25,9 @@ class _MapScreenState extends State<MapScreen> {
           ListenableBuilder(
             listenable: viewModel,
             builder: (context, _) {
-              final markers = viewModel.markers.values.map((e) => e.marker).toSet();
+              final markers = viewModel.markers.values
+                  .map((e) => e.marker)
+                  .toSet();
               final selected = viewModel.selectedData;
               final selectedId = viewModel.selectedMarkerId;
 
@@ -38,13 +40,17 @@ class _MapScreenState extends State<MapScreen> {
                       String type = 'Item';
                       if (selectedId != null) {
                         final v = selectedId.value;
-                        if (v.startsWith('campsite_')) type = 'Campsite';
-                        else if (v.startsWith('walking_')) type = 'Walking';
+                        if (v.startsWith('campsite_'))
+                          type = 'Campsite';
+                        else if (v.startsWith('walking_'))
+                          type = 'Walking';
                       }
 
                       String name;
                       try {
-                        name = (selected as dynamic).name?.toString() ?? selected.toString();
+                        name =
+                            (selected as dynamic).name?.toString() ??
+                            selected.toString();
                       } catch (_) {
                         name = selected.toString();
                       }
@@ -53,12 +59,15 @@ class _MapScreenState extends State<MapScreen> {
                       String? staticLink;
                       String? walkingLink;
                       try {
-                        staticLink = (selected as dynamic).staticLink as String?;
+                        staticLink =
+                            (selected as dynamic).staticLink as String?;
                       } catch (_) {
                         staticLink = null;
                       }
                       try {
-                        walkingLink = (selected as dynamic).walkingAndTrampingWebPage as String?;
+                        walkingLink =
+                            (selected as dynamic).walkingAndTrampingWebPage
+                                as String?;
                       } catch (_) {
                         walkingLink = null;
                       }
@@ -70,19 +79,29 @@ class _MapScreenState extends State<MapScreen> {
                             onTap: () async {
                               if (url.isEmpty) return;
                               try {
-                                await launchUrlString(url, mode: LaunchMode.externalApplication);
+                                await launchUrlString(
+                                  url,
+                                  mode: LaunchMode.externalApplication,
+                                );
                               } catch (e) {
                                 print('Could not launch $url: $e');
                               }
                             },
                             child: Row(
                               children: [
-                                const Icon(Icons.link, size: 18, color: Colors.blue),
+                                const Icon(
+                                  Icons.link,
+                                  size: 18,
+                                  color: Colors.blue,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     label,
-                                    style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -97,12 +116,26 @@ class _MapScreenState extends State<MapScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(type, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                            Text(
+                              type,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 8),
-                            if (staticLink != null && staticLink.isNotEmpty) linkTile('Official page', staticLink),
-                            if (walkingLink != null && walkingLink.isNotEmpty) linkTile('Walking page', walkingLink),
+                            if (staticLink != null && staticLink.isNotEmpty)
+                              linkTile('Official page', staticLink),
+                            if (walkingLink != null && walkingLink.isNotEmpty)
+                              linkTile('Walking page', walkingLink),
                             const SizedBox(height: 16),
                           ],
                         ),
@@ -151,15 +184,21 @@ class _MapScreenState extends State<MapScreen> {
                             enabled: false,
                             child: StatefulBuilder(
                               builder: (context, setState) {
-                                final val = viewModel.isFilterActive(FilterType.campsites);
+                                final val = viewModel.isFilterActive(
+                                  FilterType.campsites,
+                                );
                                 return CheckboxListTile(
                                   title: const Text('Campsite'),
                                   value: val,
                                   onChanged: (v) {
-                                    viewModel.setFilterActive(FilterType.campsites, v ?? false);
+                                    viewModel.setFilterActive(
+                                      FilterType.campsites,
+                                      v ?? false,
+                                    );
                                     setState(() {});
                                   },
-                                  controlAffinity: ListTileControlAffinity.leading,
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
                                   contentPadding: EdgeInsets.zero,
                                 );
                               },
@@ -169,15 +208,21 @@ class _MapScreenState extends State<MapScreen> {
                             enabled: false,
                             child: StatefulBuilder(
                               builder: (context, setState) {
-                                final val = viewModel.isFilterActive(FilterType.walkings);
+                                final val = viewModel.isFilterActive(
+                                  FilterType.walkings,
+                                );
                                 return CheckboxListTile(
                                   title: const Text('Walking'),
                                   value: val,
                                   onChanged: (v) {
-                                    viewModel.setFilterActive(FilterType.walkings, v ?? false);
+                                    viewModel.setFilterActive(
+                                      FilterType.walkings,
+                                      v ?? false,
+                                    );
                                     setState(() {});
                                   },
-                                  controlAffinity: ListTileControlAffinity.leading,
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
                                   contentPadding: EdgeInsets.zero,
                                 );
                               },

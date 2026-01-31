@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'walking_route_api_model.g.dart';
 
 @JsonSerializable()
-class WalkingRoute {
+class WalkingRouteProperties {
   @JsonKey(name: 'OBJECTID')
   final int objectId;
   final String? name;
@@ -16,7 +16,7 @@ class WalkingRoute {
   @JsonKey(name: 'dateLoadedToGIS')
   final String? dateLoadedToGis;
 
-  WalkingRoute({
+  WalkingRouteProperties({
     required this.objectId,
     this.name,
     this.introduction,
@@ -28,10 +28,10 @@ class WalkingRoute {
     this.dateLoadedToGis,
   });
 
-  factory WalkingRoute.fromJson(Map<String, dynamic> json) =>
-      _$WalkingRouteFromJson(json);
+  factory WalkingRouteProperties.fromJson(Map<String, dynamic> json) =>
+      _$WalkingRoutePropertiesFromJson(json);
 
-  Map<String, dynamic> toJson() => _$WalkingRouteToJson(this);
+  Map<String, dynamic> toJson() => _$WalkingRoutePropertiesToJson(this);
 }
 
 @JsonSerializable()
@@ -39,7 +39,7 @@ class WalkingRouteFeature {
   final String type;
   final int id;
   final WalkingRouteGeometry geometry;
-  final WalkingRoute properties;
+  final WalkingRouteProperties properties;
 
   WalkingRouteFeature({
     required this.type,

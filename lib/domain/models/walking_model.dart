@@ -1,5 +1,6 @@
 import 'package:nzdoc_maps_mobile/data/model/walking_api_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/geometry_model.dart';
+import 'package:nzdoc_maps_mobile/domain/models/walking_route_model.dart';
 
 enum Difficulty {
   easiest("Easiest"),
@@ -66,6 +67,8 @@ class Walking {
   final String? walkingAndTrampingWebPage;
   final String? dateLoadedToGis;
 
+  final WalkingRoute? route;
+
   Walking({
     required this.point,
     required this.id,
@@ -77,9 +80,13 @@ class Walking {
     this.introductionThumbnail,
     this.walkingAndTrampingWebPage,
     this.dateLoadedToGis,
+    this.route,
   });
 
-  factory Walking.fromWalkingApi(WalkingFeature walkingFeature) {
+  factory Walking.fromWalkingApi(
+    WalkingFeature walkingFeature, {
+    WalkingRoute? route,
+  }) {
     return Walking(
       point: Point(
         x: walkingFeature.geometry.longitude,
@@ -97,6 +104,7 @@ class Walking {
       walkingAndTrampingWebPage:
           walkingFeature.properties.walkingAndTrampingWebPage,
       dateLoadedToGis: walkingFeature.properties.dateLoadedToGis,
+      route: route,
     );
   }
 }

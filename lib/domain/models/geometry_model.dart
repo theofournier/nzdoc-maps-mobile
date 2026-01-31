@@ -5,13 +5,15 @@ class Point {
   Point({required this.x, required this.y});
 }
 
-class LineString {
+sealed class LineGeometry {}
+
+class LineString extends LineGeometry {
   final List<Point> coordinates;
 
   LineString({required this.coordinates});
 }
 
-class MultiLineString {
+class MultiLineString extends LineGeometry {
   final List<List<Point>> coordinates;
 
   MultiLineString({required this.coordinates});

@@ -6,7 +6,9 @@ part of 'walking_route_api_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-WalkingRoute _$WalkingRouteFromJson(Map<String, dynamic> json) => WalkingRoute(
+WalkingRouteProperties _$WalkingRoutePropertiesFromJson(
+  Map<String, dynamic> json,
+) => WalkingRouteProperties(
   objectId: (json['OBJECTID'] as num).toInt(),
   name: json['name'] as String?,
   introduction: json['introduction'] as String?,
@@ -18,18 +20,19 @@ WalkingRoute _$WalkingRouteFromJson(Map<String, dynamic> json) => WalkingRoute(
   dateLoadedToGis: json['dateLoadedToGIS'] as String?,
 );
 
-Map<String, dynamic> _$WalkingRouteToJson(WalkingRoute instance) =>
-    <String, dynamic>{
-      'OBJECTID': instance.objectId,
-      'name': instance.name,
-      'introduction': instance.introduction,
-      'difficulty': instance.difficulty,
-      'completionTime': instance.completionTime,
-      'hasAlerts': instance.hasAlerts,
-      'introductionThumbnail': instance.introductionThumbnail,
-      'walkingAndTrampingWebPage': instance.walkingAndTrampingWebPage,
-      'dateLoadedToGIS': instance.dateLoadedToGis,
-    };
+Map<String, dynamic> _$WalkingRoutePropertiesToJson(
+  WalkingRouteProperties instance,
+) => <String, dynamic>{
+  'OBJECTID': instance.objectId,
+  'name': instance.name,
+  'introduction': instance.introduction,
+  'difficulty': instance.difficulty,
+  'completionTime': instance.completionTime,
+  'hasAlerts': instance.hasAlerts,
+  'introductionThumbnail': instance.introductionThumbnail,
+  'walkingAndTrampingWebPage': instance.walkingAndTrampingWebPage,
+  'dateLoadedToGIS': instance.dateLoadedToGis,
+};
 
 WalkingRouteFeature _$WalkingRouteFeatureFromJson(Map<String, dynamic> json) =>
     WalkingRouteFeature(
@@ -38,7 +41,7 @@ WalkingRouteFeature _$WalkingRouteFeatureFromJson(Map<String, dynamic> json) =>
       geometry: WalkingRouteGeometry.fromJson(
         json['geometry'] as Map<String, dynamic>,
       ),
-      properties: WalkingRoute.fromJson(
+      properties: WalkingRouteProperties.fromJson(
         json['properties'] as Map<String, dynamic>,
       ),
     );

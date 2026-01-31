@@ -1,6 +1,7 @@
 import 'package:nzdoc_maps_mobile/data/services/doc_api_client.dart';
 import 'package:nzdoc_maps_mobile/domain/models/campsite_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/walking_model.dart';
+import 'package:nzdoc_maps_mobile/domain/models/walking_route_model.dart';
 
 class LocationRepository {
   LocationRepository({required DocApiClient docApiClient})
@@ -32,9 +33,24 @@ class LocationRepository {
     }
     try {
       final walkings = await _docApiClient.getWalkingFromAssets();
-      _cachedWalkings = walkings.features
-          .map((walkingApi) => Walking.fromWalkingApi(walkingApi))
-          .toList();
+      final walkingRoutes = await _docApiClient.getWalkingRoutesFromAssets();
+      _cachedWalkings = walkings.features.map((walkingApi) {
+        final route = walkingRoutes.features
+            .where(
+              (routeApi) =>
+                  routeApi.properties.name == walkingApi.properties.name,
+            )
+            .firstOrNull;
+        if (route == null) {
+          print(
+            "No route found for walking id ${walkingApi.properties.objectId}",
+          );
+        }
+        return Walking.fromWalkingApi(
+          walkingApi,
+          route: route != null ? WalkingRoute.fromWalkingRouteApi(route) : null,
+        );
+      }).toList();
       return _cachedWalkings!;
     } catch (e) {
       print("Error loading walkings: $e");
