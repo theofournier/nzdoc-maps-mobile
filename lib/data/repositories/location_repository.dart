@@ -1,7 +1,11 @@
+import 'package:nzdoc_maps_mobile/data/model/campsite_api_model.dart';
+import 'package:nzdoc_maps_mobile/data/model/walking_api_model.dart';
+import 'package:nzdoc_maps_mobile/data/model/walking_route_api_model.dart';
 import 'package:nzdoc_maps_mobile/data/services/doc_api_client.dart';
 import 'package:nzdoc_maps_mobile/domain/models/campsite_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/walking_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/walking_route_model.dart';
+import 'package:nzdoc_maps_mobile/utils/result.dart';
 
 class LocationRepository {
   LocationRepository({required DocApiClient docApiClient})
@@ -11,50 +15,67 @@ class LocationRepository {
   List<Campsite>? _cachedCampsites;
   List<Walking>? _cachedWalkings;
 
-  Future<List<Campsite>> fetchCampsites() async {
+  Future<Result<List<Campsite>>> fetchCampsites() async {
     if (_cachedCampsites != null) {
-      return _cachedCampsites!;
+      return Result.ok(_cachedCampsites!);
     }
     try {
-      final campsites = await _docApiClient.getCampsitesFromAssets();
-      _cachedCampsites = campsites.features
-          .map((campsiteApi) => Campsite.fromCampsiteApi(campsiteApi))
-          .toList();
-      return _cachedCampsites!;
-    } catch (e) {
+      final campsitesResult = await _docApiClient.getCampsitesFromAssets();
+      switch (campsitesResult) {
+        case Ok<CampsiteFeatureCollection>():
+          _cachedCampsites = campsitesResult.value.features
+              .map((campsiteApi) => Campsite.fromCampsiteApi(campsiteApi))
+              .toList();
+          return Result.ok(_cachedCampsites!);
+        case Error<CampsiteFeatureCollection>():
+          return Result.error(campsitesResult.error);
+      }
+    } on Exception catch (e) {
       print("Error loading campsites: $e");
-      return [];
+      return Result.error(e);
     }
   }
 
-  Future<List<Walking>> fetchWalkings() async {
+  Future<Result<List<Walking>>> fetchWalkings() async {
     if (_cachedWalkings != null) {
-      return _cachedWalkings!;
+      return Result.ok(_cachedWalkings!);
     }
     try {
-      final walkings = await _docApiClient.getWalkingFromAssets();
-      final walkingRoutes = await _docApiClient.getWalkingRoutesFromAssets();
-      _cachedWalkings = walkings.features.map((walkingApi) {
-        final route = walkingRoutes.features
-            .where(
-              (routeApi) =>
-                  routeApi.properties.name == walkingApi.properties.name,
-            )
-            .firstOrNull;
-        if (route == null) {
-          print(
-            "No route found for walking id ${walkingApi.properties.objectId}",
-          );
-        }
-        return Walking.fromWalkingApi(
-          walkingApi,
-          route: route != null ? WalkingRoute.fromWalkingRouteApi(route) : null,
-        );
-      }).toList();
-      return _cachedWalkings!;
-    } catch (e) {
+      final walkingsResult = await _docApiClient.getWalkingFromAssets();
+      final walkingRoutesResult = await _docApiClient
+          .getWalkingRoutesFromAssets();
+      switch (walkingsResult) {
+        case Ok<WalkingFeatureCollection>():
+          final walkings = walkingsResult.value;
+          _cachedWalkings = walkings.features.map((walkingApi) {
+            WalkingRouteFeature? route;
+            if (walkingRoutesResult is Ok<WalkingRouteFeatureCollection>) {
+              route = walkingRoutesResult.value.features
+                  .where(
+                    (routeApi) =>
+                        routeApi.properties.name == walkingApi.properties.name,
+                  )
+                  .firstOrNull;
+              if (route == null) {
+                print(
+                  "No route found for walking id ${walkingApi.properties.objectId}",
+                );
+              }
+            }
+            return Walking.fromWalkingApi(
+              walkingApi,
+              route: route != null
+                  ? WalkingRoute.fromWalkingRouteApi(route)
+                  : null,
+            );
+          }).toList();
+          return Result.ok(_cachedWalkings!);
+        case Error<WalkingFeatureCollection>():
+          return Result.error(walkingsResult.error);
+      }
+    } on Exception catch (e) {
       print("Error loading walkings: $e");
-      return [];
+      return Result.error(e);
     }
   }
 }
