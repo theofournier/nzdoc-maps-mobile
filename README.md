@@ -20,3 +20,9 @@ samples, guidance on mobile development, and a full API reference.
 ```
 dart run build_runner build
 ```
+
+
+## Colors
+
+- Icon blue : #29629F
+- Walking route : #EA3322

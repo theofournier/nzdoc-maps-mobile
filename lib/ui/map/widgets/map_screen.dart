@@ -23,7 +23,7 @@ class _MapScreenState extends State<MapScreen> {
       body: ListenableBuilder(
         listenable: viewModel,
         builder: (context, _) {
-          if (viewModel.loadLocations.running) {
+          if (viewModel.loadMarkers.running) {
             return const Center(child: CircularProgressIndicator());
           }
           final markers = viewModel.markers.values.map((e) => e.marker).toSet();
