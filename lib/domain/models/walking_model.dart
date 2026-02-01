@@ -3,15 +3,16 @@ import 'package:nzdoc_maps_mobile/domain/models/geometry_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/walking_route_model.dart';
 
 enum Difficulty {
-  easiest("Easiest"),
-  easy("Easy"),
-  intermediate("Intermediate"),
-  advanced("Advanced"),
-  expert("Expert");
+  easiest("Easiest", "assets/doc_icons/easiest-short-walk.webp"),
+  easy("Easy", "assets/doc_icons/easy-walking-track.webp"),
+  intermediate("Intermediate", "assets/doc_icons/Intermediate-great-walk-or-easier-tramping-track.webp"),
+  advanced("Advanced", "assets/doc_icons/advanced-tramping-track.webp"),
+  expert("Expert", "assets/doc_icons/expert-route.webp");
 
   final String displayName;
+  final String asset;
 
-  const Difficulty(this.displayName);
+  const Difficulty(this.displayName, this.asset);
 }
 
 List<Difficulty> _parseDifficulties(String difficultiesString) {
@@ -60,7 +61,7 @@ class Walking {
   final int id;
   final String name;
   final String? introduction;
-  final List<Difficulty>? difficulty;
+  final List<Difficulty>? difficulties;
   final String? completionTime;
   final String? hasAlerts;
   final String? introductionThumbnail;
@@ -74,7 +75,7 @@ class Walking {
     required this.id,
     required this.name,
     this.introduction,
-    this.difficulty,
+    this.difficulties,
     this.completionTime,
     this.hasAlerts,
     this.introductionThumbnail,
@@ -95,7 +96,7 @@ class Walking {
       id: walkingFeature.properties.objectId,
       name: walkingFeature.properties.name,
       introduction: walkingFeature.properties.introduction,
-      difficulty: walkingFeature.properties.difficulty != null
+      difficulties: walkingFeature.properties.difficulty != null
           ? _parseDifficulties(walkingFeature.properties.difficulty!)
           : null,
       completionTime: walkingFeature.properties.completionTime,
