@@ -25,4 +25,5 @@ dart run build_runner build
 ## Colors
 
 - Icon blue : #29629F
+- Selected marker : BG #d7503f - Border #a3251b
 - Walking route : #EA3322

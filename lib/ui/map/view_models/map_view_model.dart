@@ -39,15 +39,35 @@ class MapViewModel extends ChangeNotifier {
   dynamic get selectedData =>
       _selectedMarkerId != null ? _markers[_selectedMarkerId]?.data : null;
 
-  void selectMarker(MarkerId id) {
+  Future<void> _updateSelectedMarker(MarkerId id, bool selected) async {
+    final selectedMarkerIcon = await getMarkerIcon(
+      _markers[id]!.data,
+      selected: selected,
+    );
+
+    _markers.update(id, (md) {
+      return MarkerData(
+        marker: md.marker.copyWith(
+          iconParam: selectedMarkerIcon,
+          zIndexIntParam: selected ? 1 : 0,
+        ),
+        data: md.data,
+      );
+    });
+  }
+
+  Future<void> selectMarker(MarkerId id) async {
     _selectedMarkerId = id;
     _updatePolylinesForSelection();
+    await _updateSelectedMarker(id, true);
     notifyListeners();
   }
 
-  void clearSelection() {
+  Future<void> clearSelection() async {
+    final id = _selectedMarkerId;
     _selectedMarkerId = null;
     _polylines.clear();
+    await _updateSelectedMarker(id!, false);
     notifyListeners();
   }
 
@@ -84,9 +104,9 @@ class MapViewModel extends ChangeNotifier {
         switch (campsitesResult) {
           case Ok<List<Campsite>>():
             for (final campsite in campsitesResult.value) {
-              final marker = await getCampsiteMarker(
+              final marker = await getMarker(
                 campsite,
-                (markerId) => selectMarker(markerId),
+                onTap: (markerId) => selectMarker(markerId),
               );
               _markers[marker.markerId] = MarkerData(
                 marker: marker,
@@ -102,9 +122,9 @@ class MapViewModel extends ChangeNotifier {
         switch (walkingsResult) {
           case Ok<List<Walking>>():
             for (final walking in walkingsResult.value) {
-              final marker = await getWalkingMarker(
+              final marker = await getMarker(
                 walking,
-                (markerId) => selectMarker(markerId),
+                onTap: (markerId) => selectMarker(markerId),
               );
               _markers[marker.markerId] = MarkerData(
                 marker: marker,
