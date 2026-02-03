@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nzdoc_maps_mobile/domain/models/campsite_model.dart';
+import 'package:nzdoc_maps_mobile/domain/models/location_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/walking_model.dart';
 
 Future<BitmapDescriptor> _getAssetIcon(String assetPath) async {
@@ -12,7 +13,7 @@ Future<BitmapDescriptor> _getAssetIcon(String assetPath) async {
 }
 
 Future<BitmapDescriptor> getMarkerIcon(
-  dynamic data, {
+  Location data, {
   bool selected = false,
 }) async {
   String iconPath;
@@ -32,7 +33,7 @@ Future<BitmapDescriptor> getMarkerIcon(
 }
 
 Future<Marker> getMarker(
-  dynamic data, {
+  Location data, {
   void Function(MarkerId)? onTap,
   bool selected = false,
 }) async {

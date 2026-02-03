@@ -1,5 +1,6 @@
 import 'package:nzdoc_maps_mobile/data/model/campsite_api_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/geometry_model.dart';
+import 'package:nzdoc_maps_mobile/domain/models/location_model.dart';
 
 enum CampsiteCategory {
   backcountry('Backcountry'),
@@ -254,7 +255,7 @@ List<Access> _parseAccessList(String accessString) {
   return accessList;
 }
 
-class Campsite {
+class Campsite extends Location {
   final Point point;
 
   final int id;

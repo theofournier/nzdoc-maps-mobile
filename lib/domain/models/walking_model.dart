@@ -1,11 +1,15 @@
 import 'package:nzdoc_maps_mobile/data/model/walking_api_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/geometry_model.dart';
+import 'package:nzdoc_maps_mobile/domain/models/location_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/walking_route_model.dart';
 
 enum Difficulty {
   easiest("Easiest", "assets/doc_icons/easiest-short-walk.webp"),
   easy("Easy", "assets/doc_icons/easy-walking-track.webp"),
-  intermediate("Intermediate", "assets/doc_icons/Intermediate-great-walk-or-easier-tramping-track.webp"),
+  intermediate(
+    "Intermediate",
+    "assets/doc_icons/Intermediate-great-walk-or-easier-tramping-track.webp",
+  ),
   advanced("Advanced", "assets/doc_icons/advanced-tramping-track.webp"),
   expert("Expert", "assets/doc_icons/expert-route.webp");
 
@@ -55,7 +59,7 @@ List<Difficulty> _parseDifficulties(String difficultiesString) {
   return difficulties;
 }
 
-class Walking {
+class Walking extends Location {
   final Point point;
 
   final int id;

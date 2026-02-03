@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nzdoc_maps_mobile/data/repositories/location_repository.dart';
 import 'package:nzdoc_maps_mobile/domain/models/campsite_model.dart';
+import 'package:nzdoc_maps_mobile/domain/models/location_model.dart';
 import 'package:nzdoc_maps_mobile/domain/models/walking_model.dart';
 import 'package:nzdoc_maps_mobile/ui/map/view_models/markers.dart';
 import 'package:nzdoc_maps_mobile/ui/map/view_models/route_polyline.dart';
@@ -13,7 +14,7 @@ enum FilterType { campsites, walkings }
 
 class MarkerData {
   final Marker marker;
-  final dynamic data;
+  final Location data;
 
   MarkerData({required this.marker, required this.data});
 }
@@ -36,7 +37,7 @@ class MapViewModel extends ChangeNotifier {
 
   MarkerId? _selectedMarkerId;
   MarkerId? get selectedMarkerId => _selectedMarkerId;
-  dynamic get selectedData =>
+  Location? get selectedData =>
       _selectedMarkerId != null ? _markers[_selectedMarkerId]?.data : null;
 
   Future<void> _updateSelectedMarker(MarkerId id, bool selected) async {
@@ -57,6 +58,8 @@ class MapViewModel extends ChangeNotifier {
   }
 
   Future<void> selectMarker(MarkerId id) async {
+    clearSelection();
+
     _selectedMarkerId = id;
     _updatePolylinesForSelection();
     await _updateSelectedMarker(id, true);
@@ -67,7 +70,9 @@ class MapViewModel extends ChangeNotifier {
     final id = _selectedMarkerId;
     _selectedMarkerId = null;
     _polylines.clear();
-    await _updateSelectedMarker(id!, false);
+    if (id != null) {
+      await _updateSelectedMarker(id, false);
+    }
     notifyListeners();
   }
 
