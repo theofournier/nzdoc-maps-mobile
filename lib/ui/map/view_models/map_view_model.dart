@@ -89,6 +89,14 @@ class MapViewModel extends ChangeNotifier {
   }
 
   final Set<FilterType> _activeFilters = {FilterType.campsites};
+  Set<Marker> get filteredMarkers => _markers.values
+      .where(
+        (m) =>
+            (isFilterActive(FilterType.campsites) && m.data is Campsite) ||
+            (isFilterActive(FilterType.walkings) && m.data is Walking),
+      )
+      .map((m) => m.marker)
+      .toSet();
 
   bool isFilterActive(FilterType type) => _activeFilters.contains(type);
 
@@ -98,47 +106,43 @@ class MapViewModel extends ChangeNotifier {
     } else {
       _activeFilters.remove(type);
     }
-    loadMarkers.execute();
+    notifyListeners();
   }
 
   Future<Result<void>> _loadMarkers() async {
     try {
       _markers.clear();
-      if (_activeFilters.contains(FilterType.campsites)) {
-        final campsitesResult = await _locationRepository.fetchCampsites();
-        switch (campsitesResult) {
-          case Ok<List<Campsite>>():
-            for (final campsite in campsitesResult.value) {
-              final marker = await getMarker(
-                campsite,
-                onTap: (markerId) => selectMarker(markerId),
-              );
-              _markers[marker.markerId] = MarkerData(
-                marker: marker,
-                data: campsite,
-              );
-            }
-          case Error():
-            print('Error loading campsites: ${campsitesResult.error}');
-        }
+      final campsitesResult = await _locationRepository.fetchCampsites();
+      switch (campsitesResult) {
+        case Ok<List<Campsite>>():
+          for (final campsite in campsitesResult.value) {
+            final marker = await getMarker(
+              campsite,
+              onTap: (markerId) => selectMarker(markerId),
+            );
+            _markers[marker.markerId] = MarkerData(
+              marker: marker,
+              data: campsite,
+            );
+          }
+        case Error():
+          print('Error loading campsites: ${campsitesResult.error}');
       }
-      if (_activeFilters.contains(FilterType.walkings)) {
-        final walkingsResult = await _locationRepository.fetchWalkings();
-        switch (walkingsResult) {
-          case Ok<List<Walking>>():
-            for (final walking in walkingsResult.value) {
-              final marker = await getMarker(
-                walking,
-                onTap: (markerId) => selectMarker(markerId),
-              );
-              _markers[marker.markerId] = MarkerData(
-                marker: marker,
-                data: walking,
-              );
-            }
-          case Error():
-            print('Error loading walkings: ${walkingsResult.error}');
-        }
+      final walkingsResult = await _locationRepository.fetchWalkings();
+      switch (walkingsResult) {
+        case Ok<List<Walking>>():
+          for (final walking in walkingsResult.value) {
+            final marker = await getMarker(
+              walking,
+              onTap: (markerId) => selectMarker(markerId),
+            );
+            _markers[marker.markerId] = MarkerData(
+              marker: marker,
+              data: walking,
+            );
+          }
+        case Error():
+          print('Error loading walkings: ${walkingsResult.error}');
       }
 
       print('markers loaded: ${_markers.length}');

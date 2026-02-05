@@ -16,7 +16,6 @@ class MapScreen extends StatelessWidget {
         if (viewModel.loadMarkers.running) {
           return const Center(child: CircularProgressIndicator());
         }
-        final markers = viewModel.markers.values.map((e) => e.marker).toSet();
         final selected = viewModel.selectedData;
 
         return Scaffold(
@@ -27,7 +26,7 @@ class MapScreen extends StatelessWidget {
                   target: LatLng(-41.2865, 174.7762), // Wellington, NZ
                   zoom: 5,
                 ),
-                markers: markers,
+                markers: viewModel.filteredMarkers,
                 polylines: viewModel.polylines,
               ),
               SafeArea(
