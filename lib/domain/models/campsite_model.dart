@@ -256,10 +256,6 @@ List<Access> _parseAccessList(String accessString) {
 }
 
 class Campsite extends Location {
-  final Point point;
-
-  final int id;
-  final String name;
   final String? place;
   final String? region;
   final String? introduction;
@@ -284,9 +280,9 @@ class Campsite extends Location {
   final String? globalId;
 
   Campsite({
-    required this.point,
-    required this.id,
-    required this.name,
+    required super.point,
+    required super.id,
+    required super.name,
     this.place,
     this.region,
     this.introduction,

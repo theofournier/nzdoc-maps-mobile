@@ -60,10 +60,6 @@ List<Difficulty> _parseDifficulties(String difficultiesString) {
 }
 
 class Walking extends Location {
-  final Point point;
-
-  final int id;
-  final String name;
   final String? introduction;
   final List<Difficulty>? difficulties;
   final String? completionTime;
@@ -75,9 +71,9 @@ class Walking extends Location {
   final WalkingRoute? route;
 
   Walking({
-    required this.point,
-    required this.id,
-    required this.name,
+    required super.point,
+    required super.id,
+    required super.name,
     this.introduction,
     this.difficulties,
     this.completionTime,
