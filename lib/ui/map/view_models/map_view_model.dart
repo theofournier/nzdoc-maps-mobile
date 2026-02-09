@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nzdoc_maps_mobile/data/repositories/location_repository.dart';
 import 'package:nzdoc_maps_mobile/domain/models/campsite_model.dart';
@@ -23,9 +24,14 @@ class MapViewModel extends ChangeNotifier {
   MapViewModel({required LocationRepository locationRepository})
     : _locationRepository = locationRepository {
     loadMarkers = Command0<void>(_loadMarkers)..execute();
+    checkLocationPermission = Command0<void>(_checkLocationPermission)
+      ..execute();
   }
 
   late final Command0<void> loadMarkers;
+  late final Command0<void> checkLocationPermission;
+
+  bool get isLoading => loadMarkers.running || checkLocationPermission.running;
 
   final LocationRepository _locationRepository;
 
@@ -151,5 +157,27 @@ class MapViewModel extends ChangeNotifier {
       notifyListeners();
     }
     return Result.ok(null);
+  }
+
+  bool locationEnabled = false;
+
+  Future<Result<void>> _checkLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    locationEnabled =
+        permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+    notifyListeners();
+    return Result.ok(null);
+  }
+
+  Future<void> requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    locationEnabled =
+        permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+    notifyListeners();
   }
 }

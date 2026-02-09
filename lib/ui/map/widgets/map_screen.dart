@@ -13,7 +13,7 @@ class MapScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: viewModel,
       builder: (context, _) {
-        if (viewModel.loadMarkers.running) {
+        if (viewModel.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
         final selected = viewModel.selectedData;
@@ -28,6 +28,12 @@ class MapScreen extends StatelessWidget {
                 ),
                 markers: viewModel.filteredMarkers,
                 polylines: viewModel.polylines,
+                myLocationEnabled: viewModel.locationEnabled,
+                onMapCreated: (_) => viewModel.requestLocationPermission(),
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 64,
+                  bottom: MediaQuery.of(context).padding.bottom,
+                ),
               ),
               SafeArea(
                 child: Padding(
